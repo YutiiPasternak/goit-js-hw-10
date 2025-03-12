@@ -7,7 +7,7 @@ import 'flatpickr/dist/flatpickr.min.css';
 import iziToast from 'izitoast';
 // // Додатковий імпорт стилів
 import 'izitoast/dist/css/iziToast.min.css';
-import iconDagger from '../img/icon/Group.png';
+// import iconDagger from '/src/img/icon/Group.png';
 
 const dateTimePicker = document.querySelector('#datetime-picker');
 const startButton = document.querySelector('#start-button');
