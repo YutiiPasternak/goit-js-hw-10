@@ -1,121 +1,54 @@
+// Описаний у документації
 import iziToast from 'izitoast';
+// Додатковий імпорт стилів
 import 'izitoast/dist/css/iziToast.min.css';
-// import iconDagger from '../img/icon/Group.png';
-import iconOk from '../img/icon/form icon/circle Ok.png';
-import iconCaution from '../img/icon/form icon/triangle Caution.png';
-import iconBell from '../img/icon/form icon/bell welcome.png';
 
+// Отримуємо елементи форми
 const form = document.querySelector('.form');
-form.setAttribute('novalidate', '');
+const delayInput = form.querySelector('input[name="delay"]');
+const stateRadios = form.querySelectorAll('input[name="state"]');
 
-const successMessage = {
-  title: 'OK',
-  position: 'topRight',
-  messageColor: '#fff',
-  backgroundColor: '#59a10d',
-  iconColor: '#fff',
-  close: true,
-  titleColor: '#fff',
-  closeColor: '#fff',
-  iconUrl: iconOk,
-};
-
-const errorMessage = {
-  title: 'Error',
-  position: 'topRight',
-  messageColor: '#fff',
-  backgroundColor: '#ef4040',
-  iconColor: '#fff',
-  close: true,
-  titleColor: '#fff',
-  closeColor: '#fff',
-  iconUrl: iconDagger,
-};
-
-const cautionMessage = {
-  title: 'Caution',
-  position: 'topRight',
-  message: 'You forgot important data',
-  messageColor: '#fff',
-  backgroundColor: '#ffa000',
-  iconColor: '#fff',
-  close: true,
-  titleColor: '#fff',
-  closeColor: '#fff',
-  iconUrl: iconCaution,
-};
-
-const informingMessage = {
-  title: 'Hello',
-  message: 'Welcome!',
-  position: 'topRight',
-  messageColor: '#fff',
-  backgroundColor: '#09f',
-  iconColor: '#fff',
-  close: true,
-  titleColor: '#fff',
-  closeColor: '#fff',
-  iconUrl: iconBell,
-};
-
-// Відображення вітального повідомлення
-iziToast.show(informingMessage);
-
-form.addEventListener('submit', function promiseFunction(event) {
-  event.preventDefault();
-
-  const delayInput = document.querySelector('input[name="delay"]');
-  const getState = document.querySelector('input[name="state"]:checked');
-
-  if (delayInput.value === '') {
-    // console.log('Enter some number');
-    iziToast.show(cautionMessage);
-    event.currentTarget.reset();
-    return;
-  }
-
-  if (Number(delayInput.value) <= 0) {
-    // console.log('You must enter a valid value');
-    iziToast.show(cautionMessage);
-    event.currentTarget.reset();
-    return;
-  }
-
-  if (!getState) {
-    // console.log('You forgot to choose a promise type');
-    iziToast.show(cautionMessage);
-    return;
-  }
-
-  const promiseDelay = Number(delayInput.value);
-
-  const promise = new Promise((resolve, reject) => {
+// Функція для створення промісу
+function createPromise(delay, state) {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (getState.value === 'fulfilled') {
-        resolve(promiseDelay);
+      if (state === 'fulfilled') {
+        resolve(delay);
       } else {
-        reject(promiseDelay);
+        reject(delay);
       }
-    }, promiseDelay);
+    }, delay);
   });
+}
+
+// Обробник сабміту форми
+form.addEventListener('submit', function (event) {
+  event.preventDefault(); // Запобігаємо перезавантаженню сторінки
+
+  const delay = parseInt(delayInput.value);
+  const state = [...stateRadios].find(radio => radio.checked)?.value;
+
+  if (isNaN(delay) || !state) {
+    return; // Якщо немає значення delay або вибраного стану, нічого не робимо
+  }
+
+  const promise = createPromise(delay, state);
 
   promise
-    .then(delay => {
-      const message = `✅ Fulfilled promise in ${delay}ms`;
-      console.log(message);
+    .then(resolvedDelay => {
+      // Якщо проміс виконано успішно
       iziToast.success({
-        ...successMessage,
-        message: message,
+        title: 'Success',
+        message: `✅ Fulfilled promise in ${resolvedDelay}ms`,
+        position: 'topRight',
       });
     })
-    .catch(delay => {
-      const message = `❌ Rejected promise in ${delay}ms`;
-      console.log(message);
+    .catch(rejectedDelay => {
+      // Якщо проміс відхилено
       iziToast.error({
-        ...errorMessage,
-        message: message,
+        title: 'Error',
+        message: `❌ Rejected promise in ${rejectedDelay}ms`,
+        position: 'topRight',
       });
     });
-
-  event.currentTarget.reset();
 });
